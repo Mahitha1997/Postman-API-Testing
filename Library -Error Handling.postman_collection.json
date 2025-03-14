@@ -1,0 +1,214 @@
+{
+	"info": {
+		"_postman_id": "056b5531-43d6-4635-a283-80c991bad812",
+		"name": "Library -Error Handling",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42529690"
+	},
+	"item": [
+		{
+			"name": "AddBook",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"const bookId = jsonData.ID; \r",
+							"//fetch the value from response body and set it as a collection level variable\r",
+							"pm.collectionVariables.set(\"book_id\", bookId);\r",
+							"\r",
+							"var req = JSON.parse(pm.request.body.raw);\r",
+							"\r",
+							"pm.collectionVariables.set(\"flag\", false);\r",
+							"\r",
+							"function cleanupScript(){\r",
+							"\r",
+							"\tconst book_id =generateBookId();\r",
+							"    pm.collectionVariables.set(\"book_id\",book_id);\r",
+							"\tpm.collectionVariables.set(\"flag\", true);\r",
+							"\tpm.execution.setNextRequest(\"DeleteBook\");\r",
+							"}\r",
+							"\r",
+							"function generateBookId(){\r",
+							"    const expected_id = req.isbn + req.aisle;\r",
+							"    return expected_id;\r",
+							"\r",
+							"}\r",
+							"\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"\ttry{\r",
+							"\t\tpm.response.to.have.status(200);\r",
+							"\t\tpm.expect(jsonData).to.have.property(\"Msg\");\r",
+							"        pm.expect(jsonData.Msg).to.eql(\"successfully added\");\r",
+							"\t}\r",
+							"\tcatch(err){\r",
+							"\t\tif(jsonData.Msg.includes(\"Exists\")){\r",
+							"\t\t\tcleanupScript();\r",
+							"\t\t}\r",
+							"\r",
+							"\t}  \r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const code = pm.collectionVariables.get(\"companyCode\");\r",
+							"const randomNum = Math.floor(Math.random()*10);\r",
+							"//console.log(randomNum);\r",
+							"const isbn = code + randomNum;\r",
+							"//console.log(isbn);\r",
+							"pm.collectionVariables.set(\"isbn\", isbn)\r",
+							"\r",
+							"const requestBodyJson = pm.request.body.raw;\r",
+							"//console.log(requestBodyJson);\r",
+							"const parsedJsonBody = JSON.parse(requestBodyJson);\r",
+							"//console.log(parsedJsonBody);\r",
+							"const bookname = parsedJsonBody.name;\r",
+							"console.log(bookname)\r",
+							"pm.collectionVariables.set(\"bookName\", bookname)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"name\":\"Learn Appium Automation with Java\",\r\n\"isbn\":\"{{isbn}}\",\r\n\"aisle\":\"2272\",\r\n\"author\":\"{{$randomFullName}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/Library/Addbook.php",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"Library",
+						"Addbook.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteBook",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"validate the Json response\",function()\r",
+							"{\r",
+							"pm.response.to.have.status(200);\r",
+							"const jsonData =pm.response.json();\r",
+							"pm.expect(jsonData.msg).to.eql(\"book is successfully deleted\");\r",
+							"\r",
+							"if(pm.collectionVariables.get(\"flag\")){\r",
+							"\tpm.execution.setNextRequest(\"AddBook\");\r",
+							"\r",
+							"}\r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n \r\n\"ID\" : \"{{book_id}}\"\r\n \r\n} \r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://rahulshettyacademy.com/Library/DeleteBook.php",
+					"protocol": "https",
+					"host": [
+						"rahulshettyacademy",
+						"com"
+					],
+					"path": [
+						"Library",
+						"DeleteBook.php"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "companyCode",
+			"value": "RS",
+			"type": "string"
+		},
+		{
+			"key": "isbn",
+			"value": ""
+		},
+		{
+			"key": "book_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bookName",
+			"value": ""
+		},
+		{
+			"key": "flag",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
